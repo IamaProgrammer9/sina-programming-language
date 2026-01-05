@@ -2,6 +2,8 @@ pub mod cwd;
 pub mod file_handler;
 pub mod file_reader;
 pub mod parser;
+mod validators;
+
 use lazy_static::lazy_static;
 use std::collections::HashMap;
 use std::sync::Mutex;
@@ -17,7 +19,8 @@ pub enum Value {
 pub struct Variable {
     pub name: String,
     pub value_type: String,
-    pub value: String,
+    pub value: Value,
+    pub constant: bool,
 }
 
 #[derive(Debug, Clone)]
@@ -34,18 +37,26 @@ pub struct File {
 }
 
 lazy_static! {
-    static ref GLOBAL_TREE: Mutex<HashMap<String, Value>> = Mutex::new(HashMap::new());
+    static ref GLOBAL_TREE: Mutex<HashMap<String, File>> = Mutex::new(HashMap::new());
 }
  
 fn main() {
     let cwd = cwd::get_cwd().unwrap();
     let file_path = file_handler::get_file_path(cwd.to_str().unwrap());
     let file_content = file_reader::read_file(&file_path);
-    add_to_global_tree("x".to_string(), Value::Int(42));
-    parser::parse(file_content);
+    let file = File {
+        name: file_path.clone(),
+        variables: Vec::new(),
+        functions: Vec::new(),
+    };
+    GLOBAL_TREE.lock().unwrap().insert(file_path.clone(), file);
+    // add_to_global_tree("x".to_string(), Value::Int(42));
+    parser::parse(&file_path, file_content);
 }
 
-pub fn add_to_global_tree(key: String, value: Value) {
+pub fn add_to_global_tree(file_name: &str, variable: Variable) {
     let mut tree = GLOBAL_TREE.lock().unwrap();
-    tree.insert(key, value);
+    if let Some(file) = tree.get_mut(file_name) {
+        file.variables.push(variable);
+    }
 }
