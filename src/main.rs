@@ -39,7 +39,7 @@ pub struct File {
 lazy_static! {
     static ref GLOBAL_TREE: Mutex<HashMap<String, File>> = Mutex::new(HashMap::new());
 }
- 
+
 fn main() {
     let cwd = cwd::get_cwd().unwrap();
     let file_path = file_handler::get_file_path(cwd.to_str().unwrap());
@@ -54,9 +54,23 @@ fn main() {
     parser::parse(&file_path, file_content);
 }
 
-pub fn add_to_global_tree(file_name: &str, variable: Variable) {
+pub fn add_to_global_tree(file_name: &str, variable: &Variable) {
     let mut tree = GLOBAL_TREE.lock().unwrap();
     if let Some(file) = tree.get_mut(file_name) {
-        file.variables.push(variable);
+        file.variables.push(variable.clone());
+    }
+}
+
+pub fn variable_exists(file_name: &str, variable_name: &str) -> bool {
+    let mut tree = GLOBAL_TREE.lock().unwrap();
+    if let Some(file) = tree.get(file_name) {
+        for c in file.variables.iter() {
+            if c.name == variable_name {
+                return true;
+            }
+        }
+        false
+    } else {
+        false
     }
 }

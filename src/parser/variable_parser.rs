@@ -1,4 +1,4 @@
-use crate::{Value, add_to_global_tree, Variable, GLOBAL_TREE};
+use crate::{Value, add_to_global_tree, Variable, GLOBAL_TREE, variable_exists};
 
 pub fn parse_variable_expression(file_name: &str, expr: &str) {
     let variable_name = expr.split_whitespace().nth(1).unwrap().replace(":", "");
@@ -16,9 +16,7 @@ pub fn parse_variable_expression(file_name: &str, expr: &str) {
         value,
     };
 
-    add_to_global_tree(file_name, variable);
-
-    println!("TREE: {:?}", GLOBAL_TREE.lock().unwrap());
+    add_to_global_tree(file_name, &variable);
 }
 
 fn is_constant(expr: &str) -> bool {
@@ -77,4 +75,34 @@ fn valid_str(value: &str) -> bool {
 
 fn valid_float(value: &str) -> bool {
     value.parse::<f64>().is_ok()
+}
+
+fn get_expression_value(value: &str) -> &str {
+    let expression_parts = value.split_whitespace().collect::<Vec<&str>>();
+    let mut value_type: &str = "";
+    let first_part = expression_parts[0];
+
+    for (index, part) in expression_parts.iter().enumerate() {
+        // Handling numbers
+
+    }
+    ""
+}
+
+fn get_supposed_expression_value_type(value: &str) -> &str {
+    let expression_parts = value.split_whitespace().collect::<Vec<&str>>();
+    let first_part = expression_parts[0];
+
+    if first_part.chars().next().map_or(false, |c| c.is_ascii_digit()) {
+        if first_part.contains(".") {
+            "float"
+        } else {
+            "int"
+        }
+    } else if first_part.starts_with("'") {
+        "string"
+    } else {
+
+        "unknown"
+    }
 }
