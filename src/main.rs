@@ -2,7 +2,6 @@ pub mod cwd;
 pub mod file_handler;
 pub mod file_reader;
 pub mod parser;
-mod validators;
 
 use lazy_static::lazy_static;
 use std::collections::HashMap;
@@ -72,5 +71,14 @@ pub fn variable_exists(file_name: &str, variable_name: &str) -> bool {
         false
     } else {
         false
+    }
+}
+
+pub fn get_variable(file_name: &str, variable_name: &str) -> Option<Variable> {
+    let mut tree = GLOBAL_TREE.lock().unwrap();
+    if let Some(file) = tree.get(file_name) {
+        file.variables.iter().find(|v| v.name == variable_name).cloned()
+    } else {
+        return None;
     }
 }

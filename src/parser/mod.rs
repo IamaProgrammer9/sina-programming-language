@@ -1,6 +1,5 @@
 use crate::add_to_global_tree;
-
-pub mod variable_parser;
+mod variables;
 
 pub fn parse(file_name: &str, file: Vec<String>) {
     for line in file {
@@ -14,13 +13,15 @@ pub fn parse(file_name: &str, file: Vec<String>) {
 
         // Variable detection
         if first_word(trimmed_line) == "let" || first_word(trimmed_line) == "const" {
-            variable_parser::parse_variable_expression(file_name, trimmed_line);
+            variables::variable_parser::parse_variable_expression(file_name, trimmed_line);
             is_valid = true;
         } else {
             let (expr_type, index) = get_expression_type(trimmed_line);
             if expr_type == "variable_assignment" {
-                println!("{}", "Found variable assignment expression");
+                // println!("{}", &trimmed_line[index as usize..]);
+                variables::variable_assignment::handle_variable_assignment_expression(file_name, trimmed_line, index);
                 is_valid = true;
+                
             }
         }
 
