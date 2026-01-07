@@ -1,5 +1,6 @@
 use crate::add_to_global_tree;
 mod variables;
+mod functions;
 
 pub fn parse(file_name: &str, file: Vec<String>) {
     for line in file {
@@ -21,7 +22,8 @@ pub fn parse(file_name: &str, file: Vec<String>) {
                 // println!("{}", &trimmed_line[index as usize..]);
                 variables::variable_assignment::handle_variable_assignment_expression(file_name, trimmed_line, index);
                 is_valid = true;
-                
+            } else if expr_type == "function_call" {
+
             }
         }
 
@@ -42,6 +44,11 @@ fn get_expression_type(expr: &str) -> (&str, i32) {
     for (i, c) in expr.chars().enumerate() {
         if c == '=' {
             expression_type = "variable_assignment";
+            expression_start = i as i32;
+            break;
+        };
+        if c == '(' {
+            expression_type = "function_call";
             expression_start = i as i32;
             break;
         }

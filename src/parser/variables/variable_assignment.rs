@@ -1,20 +1,25 @@
-use crate::{get_variable, variable_exists, Value, Variable};
+use crate::{get_variable, set_variable_value, variable_exists, Value, Variable, GLOBAL_TREE};
 use crate::parser::variables::variable_parser;
+use crate::parser::variables;
+use crate::parser::variables::variable_parser::create_value;
 
 pub fn handle_variable_assignment_expression(file_name: &str, expr: &str, equal_index: i32) {
     // Getting the name of the variable to assign the value to
     let var_name: String = get_expression_variable_name(expr, equal_index).to_string();
     let expression_value_str: String = get_expression_value_str(expr, equal_index).to_string();
     let supposed_value_type: String = get_supposed_expression_value_type(file_name, &expression_value_str);
-    let expression_value_parts = get_expression_value_parts(&expression_value_str.trim_end_matches(";"));
-
-    evaluate_expression_value(file_name, expression_value_parts, &supposed_value_type);
+    let expression_value_parts: Vec<&str> = get_expression_value_parts(&expression_value_str.trim_end_matches(";"));
+    let evaluated_value: Value = evaluate_expression_value(file_name, expression_value_parts, &supposed_value_type);
 
     // Checking if it exists in the active file
     if !variable_exists(file_name, &var_name) {
-        eprintln!("Cannot assign value to non existing variable {}", var_name);
+        eprintln!("Cannot assign value to non existent variable {}", var_name);
         std::process::exit(1);
-    }
+    };
+
+    set_variable_value(file_name, &var_name, evaluated_value);
+
+    println!("{:?}", GLOBAL_TREE.lock().unwrap());
 }
 
 fn get_expression_variable_name(expr: &str, equal_index: i32) -> &str {
@@ -72,18 +77,20 @@ fn get_expression_value_parts(value: &str) -> Vec<&str> {
     parts
 }
 
-fn evaluate_expression_value(file_name: &str, value_parts: Vec<&str>, supposed_value_type: &str) {
+fn evaluate_expression_value(file_name: &str, value_parts: Vec<&str>, supposed_value_type: &str) -> Value {
     let mut edit_value_parts: Vec<String> = value_parts.iter().map(|s| s.to_string()).collect();
-    for (i, c) in value_parts.iter().enumerate() {
-        if matches!(*c, "+" | "-" | "*" | "/") {
+    let mut i = 0;
+    let mut added: String = "".to_string();
+    while i < edit_value_parts.len() {
+        let c = &edit_value_parts[i];
+        if matches!(c.as_str(), "+" | "-" | "*" | "/") {
             if i == 0 {
-                eprintln!("Cannot perform operation to non existing variable");
+                eprintln!("Cannot perform operation on non-existing variable");
                 std::process::exit(1);
-            };
+            }
             if *c == "+" {
                 let (first_value, first_value_type) = get_value(file_name, &edit_value_parts[i-1]);
                 let (second_value, second_value_type) = get_value(file_name, &edit_value_parts[i+1]);
-                let mut added: String = "".to_string();
                 // Validation
                 if &first_value_type != &second_value_type {
                     eprintln!("Cannot perform operation to different value types");
@@ -99,24 +106,23 @@ fn evaluate_expression_value(file_name: &str, value_parts: Vec<&str>, supposed_v
                                 first_value.replace("'", ""),
                                 second_value.replace("'", "")
                         );
-                }
                 edit_value_parts.remove(i + 1);
                 edit_value_parts.remove(i);
                 edit_value_parts.remove(i - 1);
-
-                println!("Added {}", added);
                 edit_value_parts.insert(i - 1, added);
-                println!("{}", edit_value_parts.len());
+                }
 
-                // Removing the three items (before and after)
+                i = 0;
+                continue;
+            } else {
+                i = 1;
             }
-        } else {
-            // operand
         }
+        i += 1;
     }
 
-
-    // edit_value_parts
+    let value = create_value(edit_value_parts.join("").as_str(), supposed_value_type);
+    value
 }
 
 fn get_value(file_name: &str, value_part: &str) -> (String, String) {
@@ -135,7 +141,7 @@ fn get_value(file_name: &str, value_part: &str) -> (String, String) {
         } else {
             eprintln!(
                 "Cannot assign variable to non existing variable {}",
-                file_name
+                value_part
             );
             std::process::exit(1);
         }

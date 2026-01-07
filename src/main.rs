@@ -93,3 +93,23 @@ pub fn get_variable(file_name: &str, variable_name: &str) -> Option<Variable> {
         return None;
     }
 }
+
+pub fn set_variable_value(
+    file_name: &str,
+    variable_name: &str,
+    new_value: Value,
+) {
+    let mut tree = GLOBAL_TREE.lock().unwrap();
+
+    let file = tree
+        .get_mut(file_name)
+        .expect("File not found");
+
+    let var = file
+        .variables
+        .iter_mut()
+        .find(|v| v.name == variable_name)
+        .expect("Variable not found");
+
+    var.value = new_value;
+}

@@ -22,7 +22,7 @@ pub fn parse_variable_expression(file_name: &str, expr: &str) {
 
 // fn get_variable_name(expr: &str) -> &str {}
 
-fn create_value(value: &str, value_type: &str) -> Value {
+pub fn create_value(value: &str, value_type: &str) -> Value {
     if value_type == "int" {
         if !validators::valid_int(value) {
             eprintln!("Value type does not match with int: {}", value);;
