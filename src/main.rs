@@ -22,6 +22,17 @@ pub struct Variable {
     pub constant: bool,
 }
 
+impl Variable {
+    // Return the value as a string
+    pub fn value_as_string(&self) -> String {
+        match &self.value {
+            Value::Int(i) => i.to_string(),
+            Value::Float(f) => f.to_string(),
+            Value::Text(s) => s.clone(),
+        }
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct Function {
     pub name: String,
