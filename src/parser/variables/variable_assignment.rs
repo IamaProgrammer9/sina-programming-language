@@ -101,19 +101,19 @@ fn evaluate_expression_value(file_name: &str, value_parts: Vec<&str>, supposed_v
                 eprintln!("Cannot perform operation on non-existing variable");
                 std::process::exit(1);
             };
+            let (first_value, first_value_type) = get_value(file_name, &edit_value_parts[i-1]);
+            let (second_value, second_value_type) = get_value(file_name, &edit_value_parts[i+1]);
+            // Validation
+            if &first_value_type != &second_value_type {
+                eprintln!("Cannot perform operation on different value types");
+                std::process::exit(1);
+            };
+            if first_value_type != supposed_value_type {
+                eprintln!("Expected type {} but got {}", supposed_value_type, first_value_type);
+                std::process::exit(1);
+            }
             // Plus operator (Works for strings & integers)
             if *c == "+" {
-                let (first_value, first_value_type) = get_value(file_name, &edit_value_parts[i-1]);
-                let (second_value, second_value_type) = get_value(file_name, &edit_value_parts[i+1]);
-                // Validation
-                if &first_value_type != &second_value_type {
-                    eprintln!("Cannot perform operation on different value types");
-                    std::process::exit(1);
-                };
-                if first_value_type != supposed_value_type {
-                    eprintln!("Expected type {} but got {}", supposed_value_type, first_value_type);
-                    std::process::exit(1);
-                }
                 // Handling string addition
                 if first_value_type == "str" {
                     added =
@@ -138,6 +138,57 @@ fn evaluate_expression_value(file_name: &str, value_parts: Vec<&str>, supposed_v
                     edit_value_parts.remove(i - 1);
                     edit_value_parts.insert(i - 1, numbers_added.to_string());
                 }
+
+                i = 0;
+                continue;
+            } else if *c == "-" {
+                if first_value_type != "int" {
+                    eprintln!("Cannot perform subtraction operation on variables on variable of type int");
+                    std::process::exit(1);
+                };
+                let first_value_str = first_value.to_string();
+                let second_value_str = second_value.to_string();
+                let subtracted_numbers = first_value_str.parse::<i32>().unwrap() -
+                                              second_value_str.parse::<i32>().unwrap();
+
+                edit_value_parts.remove(i + 1);
+                edit_value_parts.remove(i);
+                edit_value_parts.remove(i - 1);
+                edit_value_parts.insert(i - 1, subtracted_numbers.to_string());
+
+                i = 0;
+                continue;
+            } else if *c == "*" {
+                if first_value_type != "int" {
+                    eprintln!("Cannot perform multiplication operation on variables on variable of type int");
+                    std::process::exit(1);
+                };
+                let first_value_str = first_value.to_string();
+                let second_value_str = second_value.to_string();
+                let multiplied_numbers = first_value_str.parse::<i32>().unwrap() *
+                    second_value_str.parse::<i32>().unwrap();
+
+                edit_value_parts.remove(i + 1);
+                edit_value_parts.remove(i);
+                edit_value_parts.remove(i - 1);
+                edit_value_parts.insert(i - 1, multiplied_numbers.to_string());
+
+                i = 0;
+                continue;
+            } else if *c == "/" {
+                if first_value_type != "int" {
+                    eprintln!("Cannot perform multiplication operation on variables on variable of type int");
+                    std::process::exit(1);
+                };
+                let first_value_str = first_value.to_string();
+                let second_value_str = second_value.to_string();
+                let divided_number = first_value_str.parse::<i32>().unwrap() /
+                    second_value_str.parse::<i32>().unwrap();
+
+                edit_value_parts.remove(i + 1);
+                edit_value_parts.remove(i);
+                edit_value_parts.remove(i - 1);
+                edit_value_parts.insert(i - 1, divided_number.to_string());
 
                 i = 0;
                 continue;
