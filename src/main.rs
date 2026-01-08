@@ -113,3 +113,33 @@ pub fn set_variable_value(
 
     var.value = new_value;
 }
+
+pub fn get_variable_type(file_name: &str, variable_name: &str) -> String {
+    let mut tree = GLOBAL_TREE.lock().unwrap();
+    let file = tree
+        .get_mut(file_name)
+        .expect("File not found");
+
+    let var = file
+        .variables
+        .iter_mut()
+        .find(|v| v.name == variable_name)
+        .expect("Variable not found");
+
+    var.value_type.clone()
+}
+
+pub fn is_constant(file_name: &str, variable_name: &str) -> bool {
+    let mut tree = GLOBAL_TREE.lock().unwrap();
+    let file = tree
+        .get_mut(file_name)
+        .expect("File not found");
+
+    let var = file
+        .variables
+        .iter_mut()
+        .find(|v| v.name == variable_name)
+        .expect("Variable not found");
+
+    var.constant
+}

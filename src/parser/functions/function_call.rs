@@ -14,7 +14,7 @@ pub fn handle_function_call(file_name: &str, expr: &str, call_index: i32) {
             return;
         }
     }
-    eprint!("Cannot find function in scope {}", function_name);
+    eprint!("Cannot find function in scope {}\n", function_name);
     std::process::exit(-1);
 }
 

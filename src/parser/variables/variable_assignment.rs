@@ -1,4 +1,4 @@
-use crate::{get_variable, set_variable_value, variable_exists, Value, Variable, GLOBAL_TREE};
+use crate::{get_variable, set_variable_value, variable_exists, Value, Variable, GLOBAL_TREE, get_variable_type, is_constant};
 use crate::parser::variables::variable_parser;
 use crate::parser::variables;
 use crate::parser::variables::variable_parser::create_value;
@@ -6,16 +6,31 @@ use crate::parser::variables::variable_parser::create_value;
 pub fn handle_variable_assignment_expression(file_name: &str, expr: &str, equal_index: i32) {
     // Getting the name of the variable to assign the value to
     let var_name: String = get_expression_variable_name(expr, equal_index).to_string();
-    let expression_value_str: String = get_expression_value_str(expr, equal_index).to_string();
-    let supposed_value_type: String = get_supposed_expression_value_type(file_name, &expression_value_str);
-    let expression_value_parts: Vec<&str> = get_expression_value_parts(&expression_value_str.trim_end_matches(";"));
-    let evaluated_value: Value = evaluate_expression_value(file_name, expression_value_parts, &supposed_value_type);
-
     // Checking if it exists in the active file
     if !variable_exists(file_name, &var_name) {
         eprintln!("Cannot assign value to non existent variable {}", var_name);
         std::process::exit(1);
     };
+
+    // Checking if it's constant
+    let is_constant = is_constant(file_name, &var_name);
+    if is_constant {
+        eprintln!("Cannot assign value to constant value {}", var_name);
+        std::process::exit(1);
+    }
+
+    // Matching the types
+    let var_type: String = get_variable_type(file_name, &var_name);
+    let expression_value_str: String = get_expression_value_str(expr, equal_index).to_string();
+    let supposed_value_type: String = get_supposed_expression_value_type(file_name, &expression_value_str);
+    if var_type != supposed_value_type {
+        eprintln!("Cannot assign value of type {} to variable {} of type {}", supposed_value_type, var_name, var_type);
+        std::process::exit(1);
+    };
+
+    // Evaluating
+    let expression_value_parts: Vec<&str> = get_expression_value_parts(&expression_value_str.trim_end_matches(";"));
+    let evaluated_value: Value = evaluate_expression_value(file_name, expression_value_parts, &supposed_value_type);
 
     set_variable_value(file_name, &var_name, evaluated_value);
 }
@@ -85,19 +100,21 @@ fn evaluate_expression_value(file_name: &str, value_parts: Vec<&str>, supposed_v
             if i == 0 {
                 eprintln!("Cannot perform operation on non-existing variable");
                 std::process::exit(1);
-            }
+            };
+            // Plus operator (Works for strings & integers)
             if *c == "+" {
                 let (first_value, first_value_type) = get_value(file_name, &edit_value_parts[i-1]);
                 let (second_value, second_value_type) = get_value(file_name, &edit_value_parts[i+1]);
                 // Validation
                 if &first_value_type != &second_value_type {
-                    eprintln!("Cannot perform operation to different value types");
+                    eprintln!("Cannot perform operation on different value types");
                     std::process::exit(1);
                 };
                 if first_value_type != supposed_value_type {
                     eprintln!("Expected type {} but got {}", supposed_value_type, first_value_type);
                     std::process::exit(1);
                 }
+                // Handling string addition
                 if first_value_type == "str" {
                     added =
                         format!("'{}{}'",
@@ -108,6 +125,18 @@ fn evaluate_expression_value(file_name: &str, value_parts: Vec<&str>, supposed_v
                 edit_value_parts.remove(i);
                 edit_value_parts.remove(i - 1);
                 edit_value_parts.insert(i - 1, added);
+
+                // Handling integer addition
+                } else if first_value_type == "int" {
+                    let first_value_str = first_value.to_string();
+                    let second_value_str = second_value.to_string();
+                    let numbers_added =
+                        first_value_str.parse::<i32>().unwrap()
+                        + second_value_str.parse::<i32>().unwrap();
+                    edit_value_parts.remove(i + 1);
+                    edit_value_parts.remove(i);
+                    edit_value_parts.remove(i - 1);
+                    edit_value_parts.insert(i - 1, numbers_added.to_string());
                 }
 
                 i = 0;
