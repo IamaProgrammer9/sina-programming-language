@@ -18,8 +18,6 @@ pub fn handle_variable_assignment_expression(file_name: &str, expr: &str, equal_
     };
 
     set_variable_value(file_name, &var_name, evaluated_value);
-
-    println!("{:?}", GLOBAL_TREE.lock().unwrap());
 }
 
 fn get_expression_variable_name(expr: &str, equal_index: i32) -> &str {

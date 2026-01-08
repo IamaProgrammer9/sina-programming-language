@@ -23,7 +23,8 @@ pub fn parse(file_name: &str, file: Vec<String>) {
                 variables::variable_assignment::handle_variable_assignment_expression(file_name, trimmed_line, index);
                 is_valid = true;
             } else if expr_type == "function_call" {
-
+                functions::function_call::handle_function_call(file_name, trimmed_line, index);
+                is_valid = true;
             }
         }
 

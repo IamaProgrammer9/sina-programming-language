@@ -1,0 +1,60 @@
+use crate::parser::functions::built_in::sina_print;
+
+pub fn handle_function_call(file_name: &str, expr: &str, call_index: i32) {
+    println!("call arguments: {:?}", get_call_arguments(expr, call_index));
+}
+
+fn get_call_arguments(expr: &str, call_index: i32) -> Vec<String> {
+    let un_split_arguments = get_un_split_call_arguments(expr, call_index);
+    let mut arguments: Vec<String> = Vec::new();
+    let mut open_bracket_number: usize = 0;
+    let mut closed_bracket_number: usize = 0;
+    let mut in_function = false;
+    let mut in_str = false;
+    let mut last_splitter_index: usize = 0;
+
+    for (i, c) in un_split_arguments.chars().enumerate() {
+        if c.to_string() == "(" {
+            open_bracket_number += 1;
+        };
+        if c.to_string() == ")" {
+            closed_bracket_number += 1;
+        };
+        if c.to_string() == "'" {
+            in_str = !in_str;
+        }
+        if closed_bracket_number != open_bracket_number {
+            in_function = true;
+        } else {
+            in_function = false;
+        }
+        if c.to_string() == "," && !in_function && !in_str {
+            arguments.push(un_split_arguments[last_splitter_index..i].trim_start_matches(" ").to_string());
+            last_splitter_index = i+1;
+        }
+    }
+
+    arguments.push(un_split_arguments[last_splitter_index..].trim_start_matches(" ").to_string());
+
+    arguments
+}
+
+fn get_un_split_call_arguments(expr: &str, call_index: i32) -> String {
+    let sliced_expr: String = expr[call_index as usize..].to_string();
+    let mut open_bracket_number: usize = 0;
+    let mut closed_bracket_number: usize = 0;
+    let mut un_split_arguments: String = sliced_expr.clone();
+    for (index, c) in sliced_expr.chars().enumerate() {
+        if c == '(' {
+            open_bracket_number += 1;
+        };
+        if c == ')' {
+            closed_bracket_number += 1;
+            if open_bracket_number == closed_bracket_number {
+                un_split_arguments = sliced_expr[..index].to_string();
+                break;
+            }
+        }
+    }
+    un_split_arguments[1..].to_string()
+}
