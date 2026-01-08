@@ -1,7 +1,21 @@
 use crate::parser::functions::built_in::sina_print;
+use crate::parser::variables::variable_assignment::get_value;
+
+static BUILT_IN_FUNCTIONS: &[&str] = &["println"];
 
 pub fn handle_function_call(file_name: &str, expr: &str, call_index: i32) {
-    println!("call arguments: {:?}", get_call_arguments(expr, call_index));
+    let arguments: Vec<String> = get_call_arguments(expr, call_index);
+    let evaluated_arguments: Vec<String> = evaluate_arguments(file_name, arguments);
+    let function_name = expr[..call_index as usize].to_string();
+
+    if BUILT_IN_FUNCTIONS.contains(&function_name.as_str()) {
+        if &function_name == "println" {
+            sina_print(evaluated_arguments);
+            return;
+        }
+    }
+    eprint!("Cannot find function in scope {}", function_name);
+    std::process::exit(-1);
 }
 
 fn get_call_arguments(expr: &str, call_index: i32) -> Vec<String> {
@@ -22,7 +36,7 @@ fn get_call_arguments(expr: &str, call_index: i32) -> Vec<String> {
         };
         if c.to_string() == "'" {
             in_str = !in_str;
-        }
+        };
         if closed_bracket_number != open_bracket_number {
             in_function = true;
         } else {
@@ -37,6 +51,13 @@ fn get_call_arguments(expr: &str, call_index: i32) -> Vec<String> {
     arguments.push(un_split_arguments[last_splitter_index..].trim_start_matches(" ").to_string());
 
     arguments
+}
+
+pub fn evaluate_arguments(file_name: &str, arguments: Vec<String>) -> Vec<String> {
+    arguments
+        .iter()
+        .map(|arg| get_value(file_name, arg).0.clone()) // take the first element of tuple
+        .collect()
 }
 
 fn get_un_split_call_arguments(expr: &str, call_index: i32) -> String {

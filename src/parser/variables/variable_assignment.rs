@@ -123,7 +123,7 @@ fn evaluate_expression_value(file_name: &str, value_parts: Vec<&str>, supposed_v
     value
 }
 
-fn get_value(file_name: &str, value_part: &str) -> (String, String) {
+pub fn get_value(file_name: &str, value_part: &str) -> (String, String) {
     if starts_with_number(value_part) {
         if value_part.contains('.') {
             (value_part.to_string(), "float".to_string())
