@@ -2,9 +2,9 @@ use crate::{Value, add_to_global_tree, Variable, GLOBAL_TREE, variable_exists, g
 use crate::parser::variables::validators;
 
 pub fn parse_variable_expression(file_name: &str, expr: &str) {
-    let variable_name = expr.split_whitespace().nth(1).unwrap().replace(":", "");
-    let variable_type = expr.split_whitespace().nth(2).unwrap().replace(";", "");
-    let variable_value = expr.split_whitespace().nth(4).unwrap().replace(";", "");
+    let variable_name = get_var_name_from_expression(file_name, expr);
+    let variable_type = get_var_type_from_expression(expr);
+    let variable_value = get_var_value_from_expression(expr);
     let is_const = validators::is_constant(expr);
     let value: Value;
 
@@ -21,20 +21,30 @@ pub fn parse_variable_expression(file_name: &str, expr: &str) {
 }
 
 fn get_var_name_from_expression(file_name: &str, expr: &str) -> String {
-    let var_name = expr.split_whitespace().nth(1).unwrap().replace(":", "").replace(";", "");
+    let mut var_name = expr
+        .split_whitespace()
+        .nth(1)
+        .unwrap()
+        .replace(";", "");
+
     if variable_exists(file_name, &var_name) {
         eprintln!("Variable {} already exists", var_name);
         std::process::exit(1);
     }
+
+    if let Some(i) = var_name.find(':') {
+        var_name.truncate(i);
+    }
+
     var_name
 }
 
-fn get_var_type_from_expression(file_name: &str, expr: &str) -> String {
+fn get_var_type_from_expression(expr: &str) -> String {
     let mut value_type_start: usize = 0;
     let mut value_type_end: usize = 0;
     for (i, c) in expr.chars().enumerate() {
         if c == ':' {
-            value_type_start = i;
+            value_type_start = i+1;
         }
         if c == '=' {
             if value_type_start == 0 {
@@ -44,7 +54,18 @@ fn get_var_type_from_expression(file_name: &str, expr: &str) -> String {
             value_type_end = i;
         }
     }
-    todo!()
+    expr[value_type_start..value_type_end].trim().to_string()
+}
+
+fn get_var_value_from_expression(expr: &str) -> String {
+    let mut value_start: usize = 0;
+    for (i, c) in expr.chars().enumerate() {
+        if c == '=' {
+            value_start = i+1;
+            break;
+        }
+    }
+    expr[value_start..].trim().trim_end_matches(";").to_string()
 }
 
 // fn get_variable_name(expr: &str) -> &str {}
