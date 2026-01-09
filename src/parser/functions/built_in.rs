@@ -1,3 +1,4 @@
+use std::io;
 
 pub fn sina_print(args: Vec<String>) {
     let mut cleaned_args: Vec<String> = Vec::new();
@@ -7,8 +8,9 @@ pub fn sina_print(args: Vec<String>) {
     println!("{}", cleaned_args.join(""));
 }
 
-fn trim_quotes(strings: &mut Vec<String>) {
-    for s in strings.iter_mut() {
-        *s = s.trim_matches('\'').to_string(); // remove ' from start and end
-    }
+fn sina_input() -> String {
+    let mut input = String::new();
+    io::stdin().read_line(&mut input).expect("Failed to read line");
+    let input = input.trim().to_string();
+    input
 }

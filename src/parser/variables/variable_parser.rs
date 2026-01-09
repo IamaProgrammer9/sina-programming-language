@@ -20,6 +20,33 @@ pub fn parse_variable_expression(file_name: &str, expr: &str) {
     add_to_global_tree(file_name, &variable);
 }
 
+fn get_var_name_from_expression(file_name: &str, expr: &str) -> String {
+    let var_name = expr.split_whitespace().nth(1).unwrap().replace(":", "").replace(";", "");
+    if variable_exists(file_name, &var_name) {
+        eprintln!("Variable {} already exists", var_name);
+        std::process::exit(1);
+    }
+    var_name
+}
+
+fn get_var_type_from_expression(file_name: &str, expr: &str) -> String {
+    let mut value_type_start: usize = 0;
+    let mut value_type_end: usize = 0;
+    for (i, c) in expr.chars().enumerate() {
+        if c == ':' {
+            value_type_start = i;
+        }
+        if c == '=' {
+            if value_type_start == 0 {
+                eprintln!("Variable type not defined");
+                std::process::exit(1);
+            }
+            value_type_end = i;
+        }
+    }
+    todo!()
+}
+
 // fn get_variable_name(expr: &str) -> &str {}
 
 pub fn create_value(value: &str, value_type: &str) -> Value {
