@@ -18,7 +18,7 @@ pub fn handle_function_call(file_name: &str, expr: &str, call_index: i32) {
     std::process::exit(-1);
 }
 
-fn get_call_arguments(expr: &str, call_index: i32) -> Vec<String> {
+pub fn get_call_arguments(expr: &str, call_index: i32) -> Vec<String> {
     let un_split_arguments = get_un_split_call_arguments(expr, call_index);
     let mut arguments: Vec<String> = Vec::new();
     let mut open_bracket_number: usize = 0;

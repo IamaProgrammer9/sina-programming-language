@@ -3,7 +3,7 @@ mod variables;
 mod functions;
 
 pub fn parse(file_name: &str, file: Vec<String>) {
-    for line in file {
+    for (i, line) in file.iter().enumerate() {
         let trimmed_line: &str = line.trim();
         let mut is_valid = false;
 
@@ -15,6 +15,12 @@ pub fn parse(file_name: &str, file: Vec<String>) {
         // Variable detection
         if first_word(trimmed_line) == "let" || first_word(trimmed_line) == "const" {
             variables::variable_parser::parse_variable_expression(file_name, trimmed_line);
+            is_valid = true;
+        } else if first_word(trimmed_line) == "fn" {
+            let function_end: usize = get_multiline_expression_end(file.clone(), i);
+            is_valid = true;
+            functions::function_parser::parse_function(file_name, file[i..function_end].to_vec());
+        } else if first_word(trimmed_line) == "}" {
             is_valid = true;
         } else {
             let (expr_type, index) = get_expression_type(trimmed_line);
@@ -57,4 +63,24 @@ fn get_expression_type(expr: &str) -> (&str, i32) {
     (expression_type, expression_start)
 }
 
-
+fn get_multiline_expression_end(file: Vec<String>, index: usize) -> usize {
+    let mut closed_braces_count: usize = 0;
+    let mut open_braces_count: usize = 1;
+    let mut final_index: usize = 0;
+    for (i, c) in file.iter().enumerate() {
+        if c.trim().trim_end_matches(";") == "}" {
+            closed_braces_count += 1;
+        } else if c.trim().trim_end_matches(";") == "{" {
+            open_braces_count += 1;
+        }
+        if closed_braces_count == open_braces_count {
+            final_index = i;
+            break;
+        }
+    };
+    if final_index == 0 {
+        eprintln!("Function end could not be found");
+        std::process::exit(1);
+    };
+    final_index
+}
