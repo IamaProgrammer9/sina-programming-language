@@ -1,25 +1,35 @@
-use crate::add_to_global_tree;
+use crate::{add_to_global_tree, Value};
+use crate::parser::variables::variable_assignment::evaluate_expression_value;
+
 mod variables;
 mod functions;
+mod conditionals;
 
 pub fn parse(file_name: &str, file: Vec<String>) {
+    let mut skip_lines: Vec<usize> = Vec::new();
     for (i, line) in file.iter().enumerate() {
         let trimmed_line: &str = line.trim();
         let mut is_valid = false;
 
         // Skip empty lines and comments
-        if trimmed_line.is_empty() || trimmed_line.starts_with('#') {
+        if trimmed_line.is_empty() || trimmed_line.starts_with('#') || skip_lines.contains(&i) {
             continue;
         }
-
         // Variable detection
         if first_word(trimmed_line) == "let" || first_word(trimmed_line) == "const" {
             variables::variable_parser::parse_variable_expression(file_name, trimmed_line);
             is_valid = true;
-        } else if first_word(trimmed_line) == "fn" {
-            let function_end: usize = get_multiline_expression_end(file.clone(), i);
+        } else if first_word(trimmed_line) == "if" {
+            let conditional_end: usize = get_multiline_expression_end(file.clone(), i);
+            let slice = &file[i..conditional_end];
+            let lines: Vec<&str> = slice
+                .iter()
+                .map(|s| s.as_str())
+                .collect();
+            conditionals::handler::evaluate_conditional(&file_name, lines);
+            // Making the parser skip conditional lines
+            skip_lines.extend(i..conditional_end);
             is_valid = true;
-            functions::function_parser::parse_function(file_name, file[i..function_end].to_vec());
         } else if first_word(trimmed_line) == "}" {
             is_valid = true;
         } else {
@@ -83,4 +93,12 @@ fn get_multiline_expression_end(file: Vec<String>, index: usize) -> usize {
         std::process::exit(1);
     };
     final_index
+}
+
+pub fn get_statement_value(file_name: &str, expression: &str) -> Value {
+    let supposed_value_type: String = variables::variable_assignment::get_supposed_expression_value_type(file_name, &expression);
+    let expression_value_parts: Vec<&str> = variables::variable_assignment::get_expression_value_parts(expression);
+    let evaluated_value: Value = variables::variable_assignment::evaluate_expression_value(file_name, expression_value_parts, &supposed_value_type);
+
+    evaluated_value
 }

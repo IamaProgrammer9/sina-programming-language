@@ -55,7 +55,7 @@ fn get_expression_value(value: &str) -> &str {
     ""
 }
 
-fn get_expression_value_parts(value: &str) -> Vec<&str> {
+pub fn get_expression_value_parts(value: &str) -> Vec<&str> {
     let mut parts = Vec::new();
     let mut last = 0;
 
@@ -90,7 +90,7 @@ fn get_expression_value_parts(value: &str) -> Vec<&str> {
     parts
 }
 
-fn evaluate_expression_value(file_name: &str, value_parts: Vec<&str>, supposed_value_type: &str) -> Value {
+pub fn evaluate_expression_value(file_name: &str, value_parts: Vec<&str>, supposed_value_type: &str) -> Value {
     let mut edit_value_parts: Vec<String> = value_parts.iter().map(|s| s.to_string()).collect();
     let mut i = 0;
     let mut added: String = "".to_string();
@@ -226,7 +226,7 @@ pub fn get_value(file_name: &str, value_part: &str) -> (String, String) {
     }
 }
 
-fn get_supposed_expression_value_type(
+pub fn get_supposed_expression_value_type(
     file_name: &str,
     value: &str
 ) -> String {
