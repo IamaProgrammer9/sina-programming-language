@@ -1,9 +1,9 @@
-use crate::parser::functions::built_in::sina_print;
+use crate::parser::functions::built_in::{sina_input, sina_print};
 use crate::parser::variables::variable_assignment::get_value;
 
 static BUILT_IN_FUNCTIONS: &[&str] = &["println"];
 
-pub fn handle_function_call(file_name: &str, expr: &str, call_index: i32) {
+pub fn handle_function_call(file_name: &str, expr: &str, call_index: i32) -> (String, String) {
     let arguments: Vec<String> = get_call_arguments(expr, call_index);
     let evaluated_arguments: Vec<String> = evaluate_arguments(file_name, arguments);
     let function_name = expr[..call_index as usize].to_string();
@@ -11,7 +11,19 @@ pub fn handle_function_call(file_name: &str, expr: &str, call_index: i32) {
     if BUILT_IN_FUNCTIONS.contains(&function_name.as_str()) {
         if &function_name == "println" {
             sina_print(evaluated_arguments);
-            return;
+            return ("".to_string(), "null".to_string());
+        } else if &function_name == "input" {
+            if evaluated_arguments.len() != 1 {
+                eprint!("Input function requires 1 argument");
+                std::process::exit(1);
+            }
+            return (sina_input(evaluated_arguments.join("").as_str()), "str".to_string());
+        } else if &function_name == "int_input" {
+            if evaluated_arguments.len() != 1 {
+                eprint!("Input function requires 1 argument");
+                std::process::exit(1);
+            }
+            return (sina_input(evaluated_arguments.join("").as_str()), "int".to_string());
         }
     }
     eprint!("Cannot find function in scope {}\n", function_name);

@@ -8,7 +8,8 @@ pub fn sina_print(args: Vec<String>) {
     println!("{}", cleaned_args.join(""));
 }
 
-fn sina_input() -> String {
+pub fn sina_input(message: &str) -> String {
+    print!("{}", message);
     let mut input = String::new();
     io::stdin().read_line(&mut input).expect("Failed to read line");
     let input = input.trim().to_string();

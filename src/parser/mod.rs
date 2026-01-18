@@ -21,7 +21,7 @@ pub fn parse(file_name: &str, file: Vec<String>) {
             variables::variable_parser::parse_variable_expression(file_name, trimmed_line);
             is_valid = true;
         } else if first_word(trimmed_line) == "if" {
-            let conditional_end: usize = get_multiline_expression_end(file.clone(), i);
+            let conditional_end: usize = get_multiline_expression_end2(file.clone(), i, 0, 0);
 
             let slice = &file[i..conditional_end];
             let lines: Vec<&str> = slice
@@ -32,7 +32,7 @@ pub fn parse(file_name: &str, file: Vec<String>) {
 
             // Expecting an else if it isn't evaluated
             if !is_evaluated {
-                expected_else.push(conditional_end+1);
+                expected_else.push(conditional_end);
             }
 
             // Making the parser skip conditional lines
@@ -41,17 +41,14 @@ pub fn parse(file_name: &str, file: Vec<String>) {
         } else if first_word(trimmed_line) == "}" {
             is_valid = true;
             if trimmed_line.trim_start_matches("}").trim().starts_with("else") {
-                let conditional_end: usize = get_multiline_expression_end(file.clone(), i);
-                if expected_else.contains(&i) {
-
-                } else {
-
+                if !expected_else.contains(&i) {
+                    let conditional_end: usize = get_multiline_expression_end(file.clone(), i, 1, 2);
+                    skip_lines.extend(i..conditional_end);
                 }
             }
         } else {
             let (expr_type, index) = get_expression_type(trimmed_line);
             if expr_type == "variable_assignment" {
-                // println!("{}", &trimmed_line[index as usize..]);
                 variables::variable_assignment::handle_variable_assignment_expression(file_name, trimmed_line, index);
                 is_valid = true;
             } else if expr_type == "function_call" {
@@ -89,9 +86,9 @@ fn get_expression_type(expr: &str) -> (&str, i32) {
     (expression_type, expression_start)
 }
 
-fn get_multiline_expression_end(file: Vec<String>, index: usize) -> usize {
-    let mut closed_braces_count: usize = 0;
-    let mut open_braces_count: usize = 1;
+fn get_multiline_expression_end(file: Vec<String>, index: usize, closed_count: usize, open_count: usize) -> usize {
+    let mut closed_braces_count: usize = closed_count;
+    let mut open_braces_count: usize = open_count;
     let mut final_index: usize = 0;
     for (i, c) in file.iter().enumerate() {
         if c.trim().trim_end_matches(";") == "}" {
@@ -108,6 +105,33 @@ fn get_multiline_expression_end(file: Vec<String>, index: usize) -> usize {
         eprintln!("Function end could not be found");
         std::process::exit(1);
     };
+    final_index
+}
+
+fn get_multiline_expression_end2(file: Vec<String>, index: usize, closed_count: usize, open_count: usize) -> usize {
+    let mut closed_braces_count: usize = closed_count;
+    let mut open_braces_count: usize = open_count;
+    let mut final_index: usize = 0;
+    // Looping over each line
+    for (line_index, line) in file[index..].iter().enumerate() {
+        // Looping over each character in the line
+        let mut in_str = false;
+        for (i, c) in line.chars().enumerate() {
+            if c == '\'' {
+                in_str = !in_str;
+            }
+            if c == '}' && !in_str && line_index != 1 {
+                closed_braces_count += 1;
+            }
+            if c == '{' && !in_str {
+                open_braces_count += 1;
+            }
+            if closed_braces_count == open_braces_count {
+                final_index = line_index+index-1;
+                break;
+            }
+        }
+    }
     final_index
 }
 
