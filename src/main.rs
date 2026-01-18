@@ -7,12 +7,48 @@ use lazy_static::lazy_static;
 use std::collections::HashMap;
 use std::sync::Mutex;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Value {
     Int(i32),
     Float(f64),
     Text(String),
+    Bool(bool),
 }
+
+impl Value {
+    pub fn as_int(&self) -> Option<i32> {
+        if let Value::Int(n) = self {
+            Some(*n)
+        } else {
+            None
+        }
+    }
+
+    pub fn as_float(&self) -> Option<f64> {
+        if let Value::Float(n) = self {
+            Some(*n)
+        } else {
+            None
+        }
+    }
+
+    pub fn as_text(&self) -> Option<&str> {
+        if let Value::Text(s) = self {
+            Some(s)
+        } else {
+            None
+        }
+    }
+
+    pub fn as_bool(&self) -> Option<bool> {
+        if let Value::Bool(b) = self {
+            Some(*b)
+        } else {
+            None
+        }
+    }
+}
+
 
 #[derive(Debug, Clone)]
 pub struct Variable {
@@ -29,6 +65,7 @@ impl Variable {
             Value::Int(i) => i.to_string(),
             Value::Float(f) => f.to_string(),
             Value::Text(s) => s.clone(),
+            Value::Bool(b) => b.to_string(),
         }
     }
 }

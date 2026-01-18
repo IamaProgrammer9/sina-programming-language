@@ -1,3 +1,5 @@
+use crate::Value;
+
 pub fn valid_int(value: &str) -> bool {
     value.parse::<i32>().is_ok()
 }
@@ -25,6 +27,15 @@ pub fn is_constant(expr: &str) -> bool {
         return true;
     } else {
         return false;
+    }
+}
+
+pub fn get_value_type(value: &Value) -> String {
+    match value {
+        Value::Int(_) => "int".to_string(),
+        Value::Text(_) => "str".to_string(),
+        Value::Bool(_) => "bool".to_string(),
+        Value::Float(_) => "float".to_string(),
     }
 }
 

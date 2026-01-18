@@ -1,0 +1,17 @@
+"filename", "language", "Rust", "comment", "blank", "total"
+"/Users/omarmohamed/Documents/Coding Projects/sina/src/cwd.rs", "Rust", 3, 0, 0, 3
+"/Users/omarmohamed/Documents/Coding Projects/sina/src/file_handler.rs", "Rust", 11, 0, 1, 12
+"/Users/omarmohamed/Documents/Coding Projects/sina/src/file_reader.rs", "Rust", 19, 0, 4, 23
+"/Users/omarmohamed/Documents/Coding Projects/sina/src/main.rs", "Rust", 154, 2, 27, 183
+"/Users/omarmohamed/Documents/Coding Projects/sina/src/parser/conditionals/handler.rs", "Rust", 139, 7, 5, 151
+"/Users/omarmohamed/Documents/Coding Projects/sina/src/parser/conditionals/mod.rs", "Rust", 1, 0, 0, 1
+"/Users/omarmohamed/Documents/Coding Projects/sina/src/parser/functions/built_in.rs", "Rust", 14, 0, 3, 17
+"/Users/omarmohamed/Documents/Coding Projects/sina/src/parser/functions/function_call.rs", "Rust", 72, 0, 10, 82
+"/Users/omarmohamed/Documents/Coding Projects/sina/src/parser/functions/function_parser.rs", "Rust", 19, 1, 3, 23
+"/Users/omarmohamed/Documents/Coding Projects/sina/src/parser/functions/mod.rs", "Rust", 3, 0, 0, 3
+"/Users/omarmohamed/Documents/Coding Projects/sina/src/parser/mod.rs", "Rust", 91, 4, 10, 105
+"/Users/omarmohamed/Documents/Coding Projects/sina/src/parser/variables/mod.rs", "Rust", 4, 0, 2, 6
+"/Users/omarmohamed/Documents/Coding Projects/sina/src/parser/variables/validators.rs", "Rust", 35, 0, 7, 42
+"/Users/omarmohamed/Documents/Coding Projects/sina/src/parser/variables/variable_assignment.rs", "Rust", 214, 18, 48, 280
+"/Users/omarmohamed/Documents/Coding Projects/sina/src/parser/variables/variable_parser.rs", "Rust", 84, 1, 14, 99
+"Total", "-", 863, 33, 134, 1030
