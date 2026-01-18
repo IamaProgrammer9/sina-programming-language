@@ -1,4 +1,5 @@
 use crate::{get_variable, set_variable_value, variable_exists, Value, Variable, GLOBAL_TREE, get_variable_type, is_constant};
+use crate::parser::functions::function_call::handle_function_call;
 use crate::parser::variables::variable_parser;
 use crate::parser::variables;
 use crate::parser::variables::variable_parser::create_value;
@@ -236,6 +237,15 @@ pub fn get_value(file_name: &str, value_part: &str) -> (String, String) {
     } else if value_part.starts_with("'") {
         (value_part.to_string(), "str".to_string())
     } else {
+        // Checking if it's a function
+        if value_part.ends_with(")") {
+            let (value, value_type) = handle_function_call(file_name, value_part, 0);
+            if value_type == "null" {
+                eprintln!("Cannot perform operation on null function");
+                std::process::exit(1);
+            }
+            return (value, value_type);
+        }
         let variable = get_variable(file_name, value_part);
         if let Some(var) = variable {
             (var.value_as_string(), var.value_type.clone())

@@ -1,7 +1,7 @@
 use crate::parser::functions::built_in::{sina_input, sina_print};
 use crate::parser::variables::variable_assignment::get_value;
 
-static BUILT_IN_FUNCTIONS: &[&str] = &["println"];
+static BUILT_IN_FUNCTIONS: &[&str] = &["println", "input", "int_input"];
 
 pub fn handle_function_call(file_name: &str, expr: &str, call_index: i32) -> (String, String) {
     let arguments: Vec<String> = get_call_arguments(expr, call_index);

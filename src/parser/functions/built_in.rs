@@ -1,4 +1,4 @@
-use std::io;
+use std::io::{self, Write};
 
 pub fn sina_print(args: Vec<String>) {
     let mut cleaned_args: Vec<String> = Vec::new();
@@ -8,10 +8,17 @@ pub fn sina_print(args: Vec<String>) {
     println!("{}", cleaned_args.join(""));
 }
 
+
 pub fn sina_input(message: &str) -> String {
     print!("{}", message);
+
+    // 🔑 Make sure the prompt is shown immediately
+    io::stdout().flush().expect("Failed to flush stdout");
+
     let mut input = String::new();
-    io::stdin().read_line(&mut input).expect("Failed to read line");
-    let input = input.trim().to_string();
-    input
+    io::stdin()
+        .read_line(&mut input)
+        .expect("Failed to read line");
+
+    input.trim_end().to_string()
 }

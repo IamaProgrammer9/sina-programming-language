@@ -42,7 +42,7 @@ pub fn parse(file_name: &str, file: Vec<String>) {
             is_valid = true;
             if trimmed_line.trim_start_matches("}").trim().starts_with("else") {
                 if !expected_else.contains(&i) {
-                    let conditional_end: usize = get_multiline_expression_end(file.clone(), i, 1, 2);
+                    let conditional_end: usize = get_multiline_expression_end2(file.clone(), i, 1, 2);
                     skip_lines.extend(i..conditional_end);
                 }
             }
@@ -84,28 +84,6 @@ fn get_expression_type(expr: &str) -> (&str, i32) {
         }
     }
     (expression_type, expression_start)
-}
-
-fn get_multiline_expression_end(file: Vec<String>, index: usize, closed_count: usize, open_count: usize) -> usize {
-    let mut closed_braces_count: usize = closed_count;
-    let mut open_braces_count: usize = open_count;
-    let mut final_index: usize = 0;
-    for (i, c) in file.iter().enumerate() {
-        if c.trim().trim_end_matches(";") == "}" {
-            closed_braces_count += 1;
-        } else if c.trim().trim_end_matches(";") == "{" {
-            open_braces_count += 1;
-        }
-        if closed_braces_count == open_braces_count {
-            final_index = i;
-            break;
-        }
-    };
-    if final_index == 0 {
-        eprintln!("Function end could not be found");
-        std::process::exit(1);
-    };
-    final_index
 }
 
 fn get_multiline_expression_end2(file: Vec<String>, index: usize, closed_count: usize, open_count: usize) -> usize {
