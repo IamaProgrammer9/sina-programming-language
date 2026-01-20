@@ -1,3 +1,4 @@
+use std::fmt::format;
 use std::io::{self, Write};
 use crate::parser::functions::return_handler;
 
@@ -10,7 +11,7 @@ pub fn sina_print(args: Vec<String>) {
 }
 
 pub fn sina_input(message: &str) -> String {
-    print!("{}", message);
+    print!("{}", message.trim_start_matches("'").trim_end_matches("'"));
 
     // 🔑 Make sure the prompt is shown immediately
     io::stdout().flush().expect("Failed to flush stdout");
@@ -20,7 +21,9 @@ pub fn sina_input(message: &str) -> String {
         .read_line(&mut input)
         .expect("Failed to read line");
 
-    input.trim_end().to_string()
+    let trimmed = input.trim();
+
+    format!("'{}'", trimmed)
 }
 
 /// Initializes all built-in functions in the `GLOBAL_FUNCTION_RETURN_TYPES`.

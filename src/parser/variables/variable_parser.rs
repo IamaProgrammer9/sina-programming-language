@@ -21,7 +21,6 @@ pub fn parse_variable_expression(file_name: &str, expr: &str) {
     let is_const = validators::is_constant(expr);
     let value: Value;
 
-    println!("Variable value {}", variable_value);
     value = get_statement_value(file_name, &variable_value);
 
     let variable = Variable {
@@ -55,22 +54,29 @@ pub fn parse_variable_expression(file_name: &str, expr: &str) {
 /// assert_eq!(get_var_name_from_expression("main.sina", "let name: str = \"Mohamed\";"), "name");
 /// ```
 fn get_var_name_from_expression(file_name: &str, expr: &str) -> String {
-    let mut var_name = expr
+
+    let mut seperator_index: usize = 0;
+    for (i, c) in expr.char_indices() {
+        if c == ':' {
+            seperator_index = i;
+            break;
+        }
+    }
+
+    let var_name = expr[..seperator_index]
         .split_whitespace()
         .nth(1)
-        .unwrap()
-        .replace(";", "");
+        .unwrap_or_else(|| {
+            eprintln!("Invalid variable declaration");
+            std::process::exit(1);
+        });
 
-    if variable_exists(file_name, &var_name) {
+    if variable_exists(file_name, var_name) {
         eprintln!("Variable {} already exists", var_name);
         std::process::exit(1);
     }
 
-    if let Some(i) = var_name.find(':') {
-        var_name.truncate(i);
-    }
-
-    var_name
+    var_name.trim().to_string()
 }
 
 /// Extracts the variable type (int, str, ...) from a variable declaration expression.
@@ -97,7 +103,7 @@ fn get_var_type_from_expression(expr: &str) -> String {
     let mut value_type_start: usize = 0;
     let mut value_type_end: usize = 0;
     for (i, c) in expr.chars().enumerate() {
-        if c == ':' {
+        if c == ':' && value_type_start == 0 {
             value_type_start = i+1;
         }
         if c == '=' {

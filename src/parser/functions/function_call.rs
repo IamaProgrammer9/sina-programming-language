@@ -23,7 +23,10 @@ pub fn handle_function_call(file_name: &str, expr: &str, call_index: i32) -> (St
                 eprint!("Input function requires 1 argument");
                 std::process::exit(1);
             }
-            return (sina_input(evaluated_arguments.join("").as_str()), "int".to_string());
+            return (
+                sina_input(evaluated_arguments.join("").as_str()).trim_end_matches("'").trim_start_matches("'").to_string(),
+                "int".to_string()
+            );
         }
     }
     eprint!("Cannot find function in scope {}\n", function_name);

@@ -102,7 +102,6 @@ pub fn evaluate_expression_value(
 
     // ✅ HANDLE SINGLE VALUE (variable or literal)
     if value_parts.len() == 1 {
-        println!("Called get_value!");
         let (value, value_type) = get_value(file_name, value_parts[0]);
 
         if value_type != supposed_value_type {
@@ -232,7 +231,6 @@ pub fn evaluate_expression_value(
 }
 
 pub fn get_value(file_name: &str, value_part: &str) -> (String, String) {
-    println!("Value part {}", value_part);
     if starts_with_number(value_part) {
         if value_part.contains('.') {
             (value_part.to_string(), "float".to_string())
@@ -253,7 +251,8 @@ pub fn get_value(file_name: &str, value_part: &str) -> (String, String) {
         }
         let variable = get_variable(file_name, value_part);
         if let Some(var) = variable {
-            (var.value_as_string(), var.value_type.clone())
+            let formatted = format!("'{}'", var.value_as_string());
+            (formatted, var.value_type.clone())
         } else {
             eprintln!(
                 "Cannot assign variable to non existing variable {}",
@@ -309,7 +308,7 @@ pub fn get_supposed_expression_value_type(
             }
         }
         // Detecting if it's a variable and getting its type
-        let variable = get_variable(file_name, first_part);
+        let variable = get_variable(file_name, first_part.trim_end_matches(' ').trim_start_matches(' '));
         if let Some(var) = variable {
             var.value_type.clone()
         } else {

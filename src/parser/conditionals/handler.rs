@@ -13,11 +13,15 @@ pub fn evaluate_conditional(file_name: &str, conditional: Vec<&str>) -> bool {
     let second_part_value = parser::get_statement_value(file_name, second_part);
     // Equality (==)
     if condition_type == "equation" {
+        println!("It's an equation");
+        println!("First part: {:#?}, second_part: {:?}", first_part_value, second_part_value);
         if first_part_value == second_part_value {
+            println!("They are equal");
             let lines: Vec<String> = conditional[1..]
                 .iter()
                 .map(|s| s.to_string())
                 .collect();
+            println!("True");
             parse(file_name, lines);
             return true;
         }
