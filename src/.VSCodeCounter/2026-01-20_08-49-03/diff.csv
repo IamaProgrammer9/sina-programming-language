@@ -1,0 +1,7 @@
+"filename", "language", "Rust", "comment", "blank", "total"
+"/Users/omarmohamed/Documents/Coding Projects/sina/src/parser/functions/built_in.rs", "Rust", 3, 1, 4, 8
+"/Users/omarmohamed/Documents/Coding Projects/sina/src/parser/functions/function_call.rs", "Rust", 12, 0, 0, 12
+"/Users/omarmohamed/Documents/Coding Projects/sina/src/parser/mod.rs", "Rust", 13, 3, 3, 19
+"/Users/omarmohamed/Documents/Coding Projects/sina/src/parser/variables/variable_assignment.rs", "Rust", 9, 1, 0, 10
+"/Users/omarmohamed/Documents/Coding Projects/sina/src/parser/variables/variable_parser.rs", "Rust", 1, 83, -1, 83
+"Total", "-", 38, 88, 6, 132

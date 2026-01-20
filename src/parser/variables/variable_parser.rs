@@ -21,6 +21,7 @@ pub fn parse_variable_expression(file_name: &str, expr: &str) {
     let is_const = validators::is_constant(expr);
     let value: Value;
 
+    println!("Variable value {}", variable_value);
     value = get_statement_value(file_name, &variable_value);
 
     let variable = Variable {

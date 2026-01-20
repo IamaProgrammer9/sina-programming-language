@@ -97,7 +97,9 @@ fn main() {
         functions: Vec::new(),
     };
     GLOBAL_TREE.lock().unwrap().insert(file_path.clone(), file);
-    // add_to_global_tree("x".to_string(), Value::Int(42));
+    // Registering built-in functions to work properly
+    parser::functions::built_in::register_built_in_functions();
+    // Parsing the main file
     parser::parse(&file_path, file_content);
 }
 

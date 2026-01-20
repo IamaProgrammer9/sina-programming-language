@@ -2,7 +2,7 @@ use crate::{add_to_global_tree, Value};
 use crate::parser::variables::variable_assignment::evaluate_expression_value;
 
 mod variables;
-mod functions;
+pub mod functions;
 mod conditionals;
 
 pub fn parse(file_name: &str, file: Vec<String>) {

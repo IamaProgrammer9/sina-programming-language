@@ -1,7 +1,10 @@
 use crate::{get_variable, set_variable_value, variable_exists, Value, Variable, GLOBAL_TREE, get_variable_type, is_constant};
 use crate::parser::functions::function_call::handle_function_call;
+use crate::parser::functions::return_handler::get_function_return_type;
+use crate::parser::functions::utils::get_call_index;
 use crate::parser::variables::variable_parser;
 use crate::parser::variables;
+use crate::parser::variables::utils::extract_func_name_from_call;
 use crate::parser::variables::variable_parser::create_value;
 
 pub fn handle_variable_assignment_expression(file_name: &str, expr: &str, equal_index: i32) {
@@ -99,6 +102,7 @@ pub fn evaluate_expression_value(
 
     // ✅ HANDLE SINGLE VALUE (variable or literal)
     if value_parts.len() == 1 {
+        println!("Called get_value!");
         let (value, value_type) = get_value(file_name, value_parts[0]);
 
         if value_type != supposed_value_type {
@@ -228,6 +232,7 @@ pub fn evaluate_expression_value(
 }
 
 pub fn get_value(file_name: &str, value_part: &str) -> (String, String) {
+    println!("Value part {}", value_part);
     if starts_with_number(value_part) {
         if value_part.contains('.') {
             (value_part.to_string(), "float".to_string())
@@ -239,7 +244,7 @@ pub fn get_value(file_name: &str, value_part: &str) -> (String, String) {
     } else {
         // Checking if it's a function
         if value_part.ends_with(")") {
-            let (value, value_type) = handle_function_call(file_name, value_part, 0);
+            let (value, value_type) = handle_function_call(file_name, value_part, get_call_index(value_part) as i32);
             if value_type == "null" {
                 eprintln!("Cannot perform operation on null function");
                 std::process::exit(1);
@@ -259,12 +264,24 @@ pub fn get_value(file_name: &str, value_part: &str) -> (String, String) {
     }
 }
 
+/// Returns the supposed value of an expression depending on the first value.
+///
+/// Can be used to detect if a user performs operations on variables of different types.
+/// # Arguments
+/// - `file_name`: full path of the currently parsed file.
+/// - `value`: &str of a value or value expression.
+/// # Returns
+/// String of the type that the expression is supposed to evaluate to (str, int, ...).
+/// # Examples
+/// | `'Omar'` -> `str` |
+/// `'Omar' + 5` -> `str` |
+/// `5` -> `int` |
+/// `5 + 5` -> `int` |
 pub fn get_supposed_expression_value_type(
     file_name: &str,
     value: &str
 ) -> String {
-    let expression_parts = value.split_whitespace().collect::<Vec<&str>>();
-    let first_part = &expression_parts[0].trim().replace(";", "");
+    let first_part = get_first_value_part(value).trim_end_matches(";");
 
     if starts_with_number(first_part) {
         if first_part.contains('.') {
@@ -275,6 +292,23 @@ pub fn get_supposed_expression_value_type(
     } else if first_part.starts_with('\'') {
         "str".to_string()
     } else {
+        // Detecting if it's a function call and getting its type.
+        if first_part.trim_end_matches(';').ends_with(")") {
+            let func_name = extract_func_name_from_call(first_part);
+            if let Some(func_name) = func_name {
+                let return_type = get_function_return_type(&func_name);
+                if let Some(return_type) = return_type {
+                    return return_type;
+                } else {
+                    eprintln!("Function {} does not exist at scope", func_name);
+                    std::process::exit(1);
+                }
+            } else {
+                eprintln!("Invalid function call.");
+                std::process::exit(1);
+            }
+        }
+        // Detecting if it's a variable and getting its type
         let variable = get_variable(file_name, first_part);
         if let Some(var) = variable {
             var.value_type.clone()
@@ -282,6 +316,20 @@ pub fn get_supposed_expression_value_type(
             "unknown".to_string()
         }
     }
+}
+
+fn get_first_value_part(value: &str) -> &str {
+    let mut in_str: bool = false;
+    let mut last_char_index: usize = value.trim_end_matches(";").len();
+    for (i, c) in value.chars().enumerate() {
+        if c == '\'' {
+            in_str = !in_str;
+        };
+        if ['+', '-', '/', '*'].contains(&c) {
+            last_char_index = i;
+        }
+    }
+    value[..last_char_index].trim_end_matches(";")
 }
 
 fn starts_with_number(s: &str) -> bool {

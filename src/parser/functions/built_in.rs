@@ -1,4 +1,5 @@
 use std::io::{self, Write};
+use crate::parser::functions::return_handler;
 
 pub fn sina_print(args: Vec<String>) {
     let mut cleaned_args: Vec<String> = Vec::new();
@@ -7,7 +8,6 @@ pub fn sina_print(args: Vec<String>) {
     }
     println!("{}", cleaned_args.join(""));
 }
-
 
 pub fn sina_input(message: &str) -> String {
     print!("{}", message);
@@ -21,4 +21,11 @@ pub fn sina_input(message: &str) -> String {
         .expect("Failed to read line");
 
     input.trim_end().to_string()
+}
+
+/// Initializes all built-in functions in the `GLOBAL_FUNCTION_RETURN_TYPES`.
+pub fn register_built_in_functions() {
+    return_handler::register_function_return_type("println", "str");
+    return_handler::register_function_return_type("input", "str");
+    return_handler::register_function_return_type("int_input", "int");
 }
