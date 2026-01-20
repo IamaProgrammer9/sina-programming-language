@@ -273,7 +273,7 @@ pub fn get_supposed_expression_value_type(
             "int".to_string()
         }
     } else if first_part.starts_with('\'') {
-        "string".to_string()
+        "str".to_string()
     } else {
         let variable = get_variable(file_name, first_part);
         if let Some(var) = variable {
