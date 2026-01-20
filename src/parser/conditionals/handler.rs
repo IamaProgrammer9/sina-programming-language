@@ -4,6 +4,7 @@ use crate::parser;
 use crate::parser::parse;
 
 pub fn evaluate_conditional(file_name: &str, conditional: Vec<&str>) -> bool {
+    println!("Conditional {:?}", conditional);
     let first_line =  conditional[0].to_string();
     let conditional_statement = get_conditional_statement(&first_line);
     let (condition_type, seperator_index, seperator_size) = get_conditional_type(conditional_statement);

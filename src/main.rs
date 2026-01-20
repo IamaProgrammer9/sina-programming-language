@@ -47,6 +47,15 @@ impl Value {
             None
         }
     }
+
+    pub fn get_type_string(&self) -> Option<&str> {
+        match self {
+            Value::Int(_) => Some("int"),
+            Value::Float(_) => Some("float"),
+            Value::Text(_) => Some("str"),
+            Value::Bool(_) => Some("bool"),
+        }
+    }
 }
 
 

@@ -1,14 +1,16 @@
 use crate::{Value, add_to_global_tree, Variable, GLOBAL_TREE, variable_exists, get_variable};
+use crate::parser::get_statement_value;
 use crate::parser::variables::validators;
+use crate::parser::variables::variable_assignment::get_supposed_expression_value_type;
 
 pub fn parse_variable_expression(file_name: &str, expr: &str) {
     let variable_name = get_var_name_from_expression(file_name, expr);
-    let variable_type = get_var_type_from_expression(expr);
     let variable_value = get_var_value_from_expression(expr);
+    let variable_type = get_supposed_expression_value_type(file_name, &variable_value);
     let is_const = validators::is_constant(expr);
     let value: Value;
 
-    value = create_value(&variable_value, &variable_type);
+    value = get_statement_value(&file_name, &variable_value);
 
     let variable = Variable {
         name: variable_name,
@@ -65,12 +67,12 @@ fn get_var_value_from_expression(expr: &str) -> String {
             break;
         }
     }
-    expr[value_start..].trim().trim_end_matches(";").to_string()
+    expr[value_start..].trim_start().trim_end().trim_end_matches(";").to_string()
 }
 
 // fn get_variable_name(expr: &str) -> &str {}
 
-pub fn create_value(value: &str, value_type: &str) -> Value {
+pub fn create_value(file_name: &str, value: &str, value_type: &str) -> Value {
     if value_type == "int" {
         if !validators::valid_int(value) {
             eprintln!("Value type does not match with int: {}", value);;
@@ -90,9 +92,14 @@ pub fn create_value(value: &str, value_type: &str) -> Value {
             std::process::exit(1);
         }
         Value::Float(value.parse::<f64>().unwrap())
+    } else if value_type == "bool" {
+        Value::Bool(value.parse::<bool>().unwrap())
     } else {
         eprint!("Unsupported value type: {}", value_type);
         std::process::exit(1);
     }
 }
 
+pub fn new_create_value() {
+
+}

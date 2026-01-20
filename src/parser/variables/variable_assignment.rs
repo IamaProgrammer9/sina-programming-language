@@ -1,5 +1,7 @@
 use crate::{get_variable, set_variable_value, variable_exists, Value, Variable, GLOBAL_TREE, get_variable_type, is_constant};
 use crate::parser::functions::function_call::handle_function_call;
+use crate::parser::functions::return_handler::{option_return_type_to_str, ReturnTypeContext};
+use crate::parser::functions::utils::{get_call_index, get_function_name};
 use crate::parser::variables::variable_parser;
 use crate::parser::variables;
 use crate::parser::variables::variable_parser::create_value;
@@ -109,7 +111,7 @@ pub fn evaluate_expression_value(
             std::process::exit(1);
         }
 
-        return create_value(&value, supposed_value_type);
+        return create_value(&file_name, &value, supposed_value_type);
     }
 
     let mut edit_value_parts: Vec<String> =
@@ -224,7 +226,7 @@ pub fn evaluate_expression_value(
 
     let final_expr = edit_value_parts.join("");
 
-    create_value(&final_expr, supposed_value_type)
+    create_value(&file_name, &final_expr, supposed_value_type)
 }
 
 pub fn get_value(file_name: &str, value_part: &str) -> (String, String) {
@@ -238,8 +240,9 @@ pub fn get_value(file_name: &str, value_part: &str) -> (String, String) {
         (value_part.to_string(), "str".to_string())
     } else {
         // Checking if it's a function
-        if value_part.ends_with(")") {
-            let (value, value_type) = handle_function_call(file_name, value_part, 0);
+        if value_part.trim_end_matches(";").ends_with(")") {
+            // Getting the call index
+            let (value, value_type) = handle_function_call(file_name, value_part, get_call_index(value_part) as i32);
             if value_type == "null" {
                 eprintln!("Cannot perform operation on null function");
                 std::process::exit(1);
@@ -251,7 +254,7 @@ pub fn get_value(file_name: &str, value_part: &str) -> (String, String) {
             (var.value_as_string(), var.value_type.clone())
         } else {
             eprintln!(
-                "Cannot assign variable to non existing variable {}",
+                "Cannot assign2 variable to non existing variable {}",
                 value_part
             );
             std::process::exit(1);
@@ -263,8 +266,8 @@ pub fn get_supposed_expression_value_type(
     file_name: &str,
     value: &str
 ) -> String {
-    let expression_parts = value.split_whitespace().collect::<Vec<&str>>();
-    let first_part = &expression_parts[0].trim().replace(";", "");
+    // println!("Value: {}", value);
+    let first_part = get_first_value_part(&value);
 
     if starts_with_number(first_part) {
         if first_part.contains('.') {
@@ -273,8 +276,14 @@ pub fn get_supposed_expression_value_type(
             "int".to_string()
         }
     } else if first_part.starts_with('\'') {
-        "string".to_string()
+        "str".to_string()
     } else {
+        if first_part.trim_end_matches(";").ends_with(')') {
+            let return_type_context = ReturnTypeContext::new();
+            let function_name = get_function_name(first_part);
+            let return_type = return_type_context.get_return_type(function_name);
+            return option_return_type_to_str(return_type).to_string();
+        }
         let variable = get_variable(file_name, first_part);
         if let Some(var) = variable {
             var.value_type.clone()
@@ -282,6 +291,20 @@ pub fn get_supposed_expression_value_type(
             "unknown".to_string()
         }
     }
+}
+
+fn get_first_value_part(value: &str) -> &str {
+    let mut in_str: bool = false;
+    let mut last_char_index: usize = value.trim_end_matches(";").len();
+    for (i, c) in value.chars().enumerate() {
+        if c == '\'' {
+            in_str = !in_str;
+        };
+        if ['+', '-', '/', '*'].contains(&c) {
+            last_char_index = i;
+        }
+    }
+    value[..last_char_index].trim_end_matches(";")
 }
 
 fn starts_with_number(s: &str) -> bool {

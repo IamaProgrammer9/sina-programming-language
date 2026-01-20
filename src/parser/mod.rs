@@ -22,7 +22,6 @@ pub fn parse(file_name: &str, file: Vec<String>) {
             is_valid = true;
         } else if first_word(trimmed_line) == "if" {
             let conditional_end: usize = get_multiline_expression_end2(file.clone(), i, 0, 0);
-
             let slice = &file[i..conditional_end];
             let lines: Vec<&str> = slice
                 .iter()
@@ -90,9 +89,11 @@ fn get_multiline_expression_end2(file: Vec<String>, index: usize, closed_count: 
     let mut closed_braces_count: usize = closed_count;
     let mut open_braces_count: usize = open_count;
     let mut final_index: usize = 0;
+    // println!("{}", file[index]);
     // Looping over each line
     for (line_index, line) in file[index..].iter().enumerate() {
         // Looping over each character in the line
+        // println!("Line {}", line);
         let mut in_str = false;
         for (i, c) in line.chars().enumerate() {
             if c == '\'' {
@@ -104,8 +105,8 @@ fn get_multiline_expression_end2(file: Vec<String>, index: usize, closed_count: 
             if c == '{' && !in_str {
                 open_braces_count += 1;
             }
-            if closed_braces_count == open_braces_count {
-                final_index = line_index+index-1;
+            if open_braces_count > 0 && closed_braces_count == open_braces_count {
+                final_index = line_index + index;
                 break;
             }
         }

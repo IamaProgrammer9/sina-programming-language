@@ -10,7 +10,7 @@ pub fn sina_print(args: Vec<String>) {
 
 
 pub fn sina_input(message: &str) -> String {
-    print!("{}", message);
+    print!("{}", message.trim_start_matches("'").trim_end_matches("'"));
 
     // 🔑 Make sure the prompt is shown immediately
     io::stdout().flush().expect("Failed to flush stdout");

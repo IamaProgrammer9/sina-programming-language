@@ -17,7 +17,10 @@ pub fn handle_function_call(file_name: &str, expr: &str, call_index: i32) -> (St
                 eprint!("Input function requires 1 argument");
                 std::process::exit(1);
             }
-            return (sina_input(evaluated_arguments.join("").as_str()), "str".to_string());
+            // Surrounding user input with ''
+            let value = sina_input(evaluated_arguments.join("").as_str());
+            let quoted = format!("'{}'", value);
+            return (quoted, "str".to_string());
         } else if &function_name == "int_input" {
             if evaluated_arguments.len() != 1 {
                 eprint!("Input function requires 1 argument");
@@ -31,7 +34,7 @@ pub fn handle_function_call(file_name: &str, expr: &str, call_index: i32) -> (St
 }
 
 pub fn get_call_arguments(expr: &str, call_index: i32) -> Vec<String> {
-    let un_split_arguments = get_un_split_call_arguments(expr, call_index);
+    let un_split_arguments = get_un_split_call_arguments(expr, call_index as usize);
     let mut arguments: Vec<String> = Vec::new();
     let mut open_bracket_number: usize = 0;
     let mut closed_bracket_number: usize = 0;
@@ -72,22 +75,22 @@ pub fn evaluate_arguments(file_name: &str, arguments: Vec<String>) -> Vec<String
         .collect()
 }
 
-fn get_un_split_call_arguments(expr: &str, call_index: i32) -> String {
-    let sliced_expr: String = expr[call_index as usize..].to_string();
-    let mut open_bracket_number: usize = 0;
-    let mut closed_bracket_number: usize = 0;
-    let mut un_split_arguments: String = sliced_expr.clone();
-    for (index, c) in sliced_expr.chars().enumerate() {
+fn get_un_split_call_arguments(expr: &str, call_index: usize) -> String {
+    let sliced_expr = &expr[call_index..];
+    let mut open = 0;
+
+    for (byte_index, c) in sliced_expr.char_indices() {
         if c == '(' {
-            open_bracket_number += 1;
-        };
-        if c == ')' {
-            closed_bracket_number += 1;
-            if open_bracket_number == closed_bracket_number {
-                un_split_arguments = sliced_expr[..index].to_string();
-                break;
+            open += 1;
+        } else if c == ')' {
+            open -= 1;
+            if open == 0 {
+                // +1 to include the ')'
+                return sliced_expr[1..byte_index].to_string();
             }
         }
     }
-    un_split_arguments[1..].to_string()
+
+    String::new()
 }
+
