@@ -192,8 +192,8 @@ pub fn evaluate_expression_value(
                     std::process::exit(1);
                 }
 
-                let a = first_value.trim_start_matches("'").trim_end_matches("'").parse::<i32>().unwrap();
-                let b = second_value.trim_start_matches("'").trim_end_matches("'").parse::<i32>().unwrap();
+                let a = first_value.parse::<i32>().unwrap();
+                let b = second_value.parse::<i32>().unwrap();
 
                 edit_value_parts.drain(i - 1..=i + 1);
                 edit_value_parts.insert(i - 1, (a - b).to_string());
@@ -263,8 +263,12 @@ pub fn get_value(file_name: &str, value_part: &str) -> (String, String) {
         }
         let variable = get_variable(file_name, value_part);
         if let Some(var) = variable {
-            let formatted = format!("'{}'", var.value_as_string());
-            (formatted, var.value_type.clone())
+            if var.value_type.clone() == "str" {
+                let formatted = format!("'{}'", var.value_as_string());
+                (formatted, var.value_type.clone())
+            } else {
+                (var.value_as_string(), var.value_type.clone())
+            }
         } else {
             eprintln!(
                 "Cannot assign variable to non existing variable {}",

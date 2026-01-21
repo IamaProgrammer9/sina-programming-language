@@ -21,7 +21,7 @@ pub fn evaluate_conditional(file_name: &str, conditional: Vec<&str>) -> bool {
             parse(file_name, lines);
             return true;
         } else {
-            println!("First part value: {:?}, Second part value: {:?}", first_part_value, second_part_value);
+            // println!("First part value: {:?}, Second part value: {:?}", first_part_value, second_part_value);
             return false;
         }
     };

@@ -21,7 +21,7 @@ pub fn parse(file_name: &str, file: Vec<String>) {
             variables::variable_parser::parse_variable_expression(file_name, trimmed_line);
             is_valid = true;
         } else if first_word(trimmed_line) == "if" {
-            let conditional_end: usize = get_multiline_expression_end2(file.clone(), i, 0, 0);
+            let conditional_end: usize = get_multiline_expression_end(&file.clone(), i);
 
             let slice = &file[i..conditional_end];
             let lines: Vec<&str> = slice
@@ -37,14 +37,13 @@ pub fn parse(file_name: &str, file: Vec<String>) {
                 // Making the parser skip conditional lines
             }
         skip_lines.extend(i..conditional_end);
-            println!("conditional_end: {}, i: {}", conditional_end, i);
 
             is_valid = true;
         } else if first_word(trimmed_line) == "}" {
             is_valid = true;
             if trimmed_line.trim_start_matches("}").trim().starts_with("else") {
                 if !expected_else.contains(&i) {
-                    let conditional_end: usize = get_multiline_expression_end2(file.clone(), i, 1, 2);
+                    let conditional_end: usize = get_multiline_expression_end(&file.clone(), i);
                     skip_lines.extend(i..conditional_end);
                 }
             }
@@ -88,33 +87,33 @@ fn get_expression_type(expr: &str) -> (&str, i32) {
     (expression_type, expression_start)
 }
 
-fn get_multiline_expression_end2(file: Vec<String>, index: usize, closed_count: usize, open_count: usize) -> usize {
-    let mut closed_braces_count: usize = closed_count;
-    let mut open_braces_count: usize = open_count;
-    let mut final_index: usize = 0;
-    // Looping over each line
-    for (line_index, line) in file[index..].iter().enumerate() {
-        // Looping over each character in the line
-        let mut in_str = false;
-        for (i, c) in line.chars().enumerate() {
+fn get_multiline_expression_end(
+    file: &[String],
+    start: usize,
+) -> usize {
+    let mut open = 0;
+    let mut close = 0;
+    let mut in_str = false;
+
+    for (line_offset, line) in file[start..].iter().enumerate() {
+        for c in line.chars() {
             if c == '\'' {
                 in_str = !in_str;
+            } else if !in_str {
+                if c == '{' {
+                    open += 1;
+                } else if c == '}' && line_offset != 0 {
+                    close += 1;
+                }
             }
-            if c == '}' && !in_str && line_index != 1 {
-                println!("Closed found at {}", line);
-                closed_braces_count += 1;
-            }
-            if c == '{' && !in_str {
-                println!("Open found at {}", line);
-                open_braces_count += 1;
-            }
-            if closed_braces_count == open_braces_count && open_braces_count > 0 {
-                final_index = line_index+index-1;
-                break;
+
+            if open > 0 && open == close {
+                return start + line_offset;
             }
         }
     }
-    final_index
+
+    panic!("Unclosed block");
 }
 
 pub fn get_statement_value(file_name: &str, expression: &str) -> Value {
