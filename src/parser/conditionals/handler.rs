@@ -13,17 +13,16 @@ pub fn evaluate_conditional(file_name: &str, conditional: Vec<&str>) -> bool {
     let second_part_value = parser::get_statement_value(file_name, second_part);
     // Equality (==)
     if condition_type == "equation" {
-        println!("It's an equation");
-        println!("First part: {:#?}, second_part: {:?}", first_part_value, second_part_value);
         if first_part_value == second_part_value {
-            println!("They are equal");
             let lines: Vec<String> = conditional[1..]
                 .iter()
                 .map(|s| s.to_string())
                 .collect();
-            println!("True");
             parse(file_name, lines);
             return true;
+        } else {
+            println!("First part value: {:?}, Second part value: {:?}", first_part_value, second_part_value);
+            return false;
         }
     };
     // Inequality (!=)
@@ -35,12 +34,15 @@ pub fn evaluate_conditional(file_name: &str, conditional: Vec<&str>) -> bool {
                 .collect();
             parse(file_name, lines);
             return true;
+        } else {
+            return false;
         }
     }
     // Any operation onwards will need an integer
     let first_value_type = parser::variables::validators::get_value_type(&first_part_value);
     let second_value_type = parser::variables::validators::get_value_type(&second_part_value);
     if first_value_type != "int" || second_value_type != "int" {
+        // println!("First part value: {:?}, Second part: {:?}", first_part_value, second_part_value);
         eprint!("Numerical operations cannot be done on type {}, {}", first_value_type, second_value_type);
         std::process::exit(1);
     }
@@ -53,6 +55,8 @@ pub fn evaluate_conditional(file_name: &str, conditional: Vec<&str>) -> bool {
                 .collect();
             parse(file_name, lines);
             return true;
+        } else {
+            return false;
         }
     }
     // Less than or equal to (<=)
@@ -64,6 +68,8 @@ pub fn evaluate_conditional(file_name: &str, conditional: Vec<&str>) -> bool {
                 .collect();
             parse(file_name, lines);
             return true;
+        } else {
+            return false;
         }
     }
     // Greater than
@@ -75,6 +81,8 @@ pub fn evaluate_conditional(file_name: &str, conditional: Vec<&str>) -> bool {
                 .collect();
             parse(file_name, lines);
             return true;
+        } else {
+            return false;
         }
     }
     // Greater than or equal to (>=)
@@ -86,6 +94,8 @@ pub fn evaluate_conditional(file_name: &str, conditional: Vec<&str>) -> bool {
                 .collect();
             parse(file_name, lines);
             return true;
+        } else {
+            return false;
         }
     }
     false

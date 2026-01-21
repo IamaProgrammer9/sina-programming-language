@@ -23,8 +23,9 @@ pub fn handle_function_call(file_name: &str, expr: &str, call_index: i32) -> (St
                 eprint!("Input function requires 1 argument");
                 std::process::exit(1);
             }
+            let input_result = sina_input(evaluated_arguments.join("").as_str()).trim_end_matches("'").trim_start_matches("'").to_string();
             return (
-                sina_input(evaluated_arguments.join("").as_str()).trim_end_matches("'").trim_start_matches("'").to_string(),
+                input_result,
                 "int".to_string()
             );
         }

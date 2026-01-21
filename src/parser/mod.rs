@@ -35,8 +35,9 @@ pub fn parse(file_name: &str, file: Vec<String>) {
                 // println!("I: {}, Conditional end: {}", i, conditional_end);
             expected_else.push(conditional_end);
                 // Making the parser skip conditional lines
-            skip_lines.extend(i..conditional_end+i);
             }
+        skip_lines.extend(i..conditional_end);
+            println!("conditional_end: {}, i: {}", conditional_end, i);
 
             is_valid = true;
         } else if first_word(trimmed_line) == "}" {
@@ -100,9 +101,11 @@ fn get_multiline_expression_end2(file: Vec<String>, index: usize, closed_count: 
                 in_str = !in_str;
             }
             if c == '}' && !in_str && line_index != 1 {
+                println!("Closed found at {}", line);
                 closed_braces_count += 1;
             }
             if c == '{' && !in_str {
+                println!("Open found at {}", line);
                 open_braces_count += 1;
             }
             if closed_braces_count == open_braces_count && open_braces_count > 0 {

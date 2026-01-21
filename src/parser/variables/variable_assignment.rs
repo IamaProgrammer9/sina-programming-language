@@ -62,9 +62,13 @@ fn get_expression_value(value: &str) -> &str {
 pub fn get_expression_value_parts(value: &str) -> Vec<&str> {
     let mut parts = Vec::new();
     let mut last = 0;
+    let mut in_str: bool = false;
 
     for (i, c) in value.char_indices() {
-        if matches!(c, '+' | '-' | '*' | '/') {
+        if c == '\'' {
+            in_str = !in_str;
+        }
+        if matches!(c, '+' | '-' | '*' | '/') && !in_str {
             // push value before operator
             let part = value[last..i].trim();
             if !part.is_empty() {
@@ -100,6 +104,10 @@ pub fn evaluate_expression_value(
     supposed_value_type: &str,
 ) -> Value {
 
+    // println!("Value parts: {:?}", value_parts);
+
+    let mut in_str: bool = false;
+
     // ✅ HANDLE SINGLE VALUE (variable or literal)
     if value_parts.len() == 1 {
         let (value, value_type) = get_value(file_name, value_parts[0]);
@@ -122,6 +130,10 @@ pub fn evaluate_expression_value(
 
     while i < edit_value_parts.len() {
         let c = &edit_value_parts[i];
+
+        if c.to_string()  == '\''.to_string() {
+            in_str = !in_str;
+        }
 
         if matches!(c.as_str(), "+" | "-" | "*" | "/") {
 
@@ -159,8 +171,8 @@ pub fn evaluate_expression_value(
                         second_value.replace("'", "")
                     )
                 } else if first_value_type == "int" {
-                    let a = first_value.parse::<i32>().unwrap();
-                    let b = second_value.parse::<i32>().unwrap();
+                    let a = first_value.trim_start_matches("'").trim_end_matches("'").parse::<i32>().unwrap();
+                    let b = second_value.trim_start_matches("'").trim_end_matches("'").parse::<i32>().unwrap();
                     (a + b).to_string()
                 } else {
                     eprintln!("Unsupported type for +");
@@ -180,8 +192,8 @@ pub fn evaluate_expression_value(
                     std::process::exit(1);
                 }
 
-                let a = first_value.parse::<i32>().unwrap();
-                let b = second_value.parse::<i32>().unwrap();
+                let a = first_value.trim_start_matches("'").trim_end_matches("'").parse::<i32>().unwrap();
+                let b = second_value.trim_start_matches("'").trim_end_matches("'").parse::<i32>().unwrap();
 
                 edit_value_parts.drain(i - 1..=i + 1);
                 edit_value_parts.insert(i - 1, (a - b).to_string());
