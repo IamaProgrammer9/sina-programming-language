@@ -47,6 +47,8 @@ pub fn parse(file_name: &str, file: Vec<String>) {
                     skip_lines.extend(i..conditional_end);
                 }
             }
+        } else if first_word(trimmed_line).trim_end_matches(";") == "exit" {
+            std::process::exit(0);
         } else {
             let (expr_type, index) = get_expression_type(trimmed_line);
             if expr_type == "variable_assignment" {
